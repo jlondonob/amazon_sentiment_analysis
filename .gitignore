@@ -160,12 +160,14 @@ Thumbs.db
 [Ll]ib64
 [Ll]ocal
 [Ss]cripts
+[Ee]tc
+[Ss]hare
 pyvenv.cfg
 .venv
 pip-selfcheck.json
 
 ### Virtual Studio ###
-
+.vscode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -175,3 +177,6 @@ pip-selfcheck.json
 
 # Local History for Visual Studio Code
 .history/
+
+# Large data files
+*.csv
