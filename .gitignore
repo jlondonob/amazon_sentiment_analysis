@@ -164,4 +164,14 @@ pyvenv.cfg
 .venv
 pip-selfcheck.json
 
-# End of https://www.toptal.com/developers/gitignore/api/python,virtualenv
+### Virtual Studio ###
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Local History for Visual Studio Code
+.history/
