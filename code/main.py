@@ -1,5 +1,6 @@
 #Imports
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 color = sns.color_palette()
@@ -42,7 +43,7 @@ plt.axis("off")
 plt.show()
 
 #-------------------------------------------------------#
-#------------------ CLASSIFIYING -----------------------#
+#------------------- CLASSIFYING -----------------------#
 #-------------------------------------------------------#
 
 df = df[df.Score != 3]
@@ -68,3 +69,65 @@ wordcloud_neg = WordCloud(stopwords = stop_words).generate(negative_text)
 plt.imshow(wordcloud_neg, interpolation='bilinear')
 plt.axis("off")
 plt.show()
+
+#Plotting negative vs positive sentiment
+df['Sentimentt'] = df['Sentiment'].replace({-1 : 'negative'})
+df['Sentimentt'] = df['Sentimentt']. replace({1 : 'positive'})
+
+fig = px.histogram(df, x='Sentimentt')
+fig.update_traces(marker_color = "indianred",
+                  marker_line_color='rgb(8,48,107)',
+                  marker_line_width=1.5)
+fig.update_layout(title_text = 'Product Sentiment')
+fig.show()
+
+#-------------------------------------------------------#
+#-------------------- THE MODEL ------------------------#
+#-------------------------------------------------------#
+
+#Creating function to remove punctuation
+def remove_punctuation(text):
+    final = "".join(u for u in text if u not in ("?", ".", ";", ":", "!", '"'))
+    return final
+
+#Removing punctuation
+df['Text'] = df['Text'].apply(remove_punctuation) #Remove punctuation in Text
+df = df.dropna(subset = ['Summary']) #Remove if na in Summary
+df['Summary'] = df['Summary'].apply(remove_punctuation) #Remove punctuation in Summary
+
+#Creating new dataframe
+dfNew = df[['Summary', 'Sentiment']]
+dfNew.head()
+
+import numpy as np
+from sklearn.model_selection import train_test_split
+#Splitting train and test datasets
+X_train, X_test, y_train, y_test = train_test_split(dfNew.Summary, dfNew.Sentiment, test_size=0.2, random_state=0)
+
+#Matrix representation of token counts
+from sklearn.feature_extraction.text import CountVectorizer
+vectorizer = CountVectorizer(token_pattern=r'\b\w+\b')
+train_matrix = vectorizer.fit_transform(X_train) #Train count matrix
+test_matrix = vectorizer.transform(X_test)   #Test count matrix
+
+from sklearn.linear_model import LogisticRegression
+lr = LogisticRegression(max_iter=1000)
+lr.fit(train_matrix, y_train)
+
+predictions = lr.predict(test_matrix)
+
+#-------------------------------------------------------#
+#-------------- TESTING ACCURACY -----------------------#
+#-------------------------------------------------------#
+
+from sklearn.metrics import confusion_matrix, classification_report
+new = np.asarray(y_test)
+confusion_matrix(predictions, y_test)
+print(classification_report(predictions, y_test))
+
+#Classes are unbalanced, thus a balanced accuracy score is better indicator
+from sklearn.metrics import balanced_accuracy_score
+balanced_accuracy_score(predictions, y_test)
+
+
+
